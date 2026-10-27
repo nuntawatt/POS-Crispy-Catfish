@@ -1,18 +1,24 @@
 package main
 
 import (
-	"fmt"
-	"log"
+	"context"
+	"log/slog"
 	"os"
+
+	"github.com/morgorn/pos-crispy-catfish/backend/internal/app"
 )
 
 func main() {
-	port := os.Getenv("BACKEND_PORT")
-	if port == "" {
-		port = "8080"
+	ctx := context.Background()
+
+	application, err := app.New(ctx)
+	if err != nil {
+		slog.Error("failed to initialize application", slog.String("error", err.Error()))
+		os.Exit(1)
 	}
 
-	log.Printf("POS-Crispy-Catfish API starting on port %s", port)
-	fmt.Printf("Server would start on :%s\n", port)
-	// TODO: Initialize config, database, router, and start server
+	if err := application.Run(); err != nil {
+		slog.Error("application encountered fatal error", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
 }
